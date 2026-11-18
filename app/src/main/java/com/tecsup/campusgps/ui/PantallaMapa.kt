@@ -38,6 +38,7 @@ fun PantallaMapa(vm: MapaViewModel) {
     val lugares by vm.lugares.collectAsStateWithLifecycle()
     val seleccionado by vm.seleccionado.collectAsStateWithLifecycle()
     val masCercano by vm.masCercano.collectAsStateWithLifecycle()
+    val categoria by vm.categoria.collectAsStateWithLifecycle()
 
     val contexto = LocalContext.current
     val lanzador = rememberLauncherForActivityResult(
@@ -114,12 +115,17 @@ fun PantallaMapa(vm: MapaViewModel) {
                     )
                 }
             }
+            FiltroCategorias(
+                categorias = vm.categorias,
+                seleccionada = categoria,
+                onSeleccionar = { vm.filtrar(it) }
+            )
             ListaLugares(
                 lugares = lugares,
                 seleccionado = seleccionado,
                 onClick = { vm.seleccionar(it) },
                 masCercanoId = masCercano?.id,
-                modifier = Modifier.fillMaxWidth().height(220.dp)
+                modifier = Modifier.fillMaxWidth().height(200.dp)
             )
         }
     }

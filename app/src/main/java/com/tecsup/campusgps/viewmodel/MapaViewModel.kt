@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -28,10 +29,20 @@ class MapaViewModel(
     private val _estado = MutableStateFlow<UbicacionUi>(UbicacionUi.Inicial)
     val estado: StateFlow<UbicacionUi> = _estado.asStateFlow()
 
-    private val _lugares = MutableStateFlow(
+    // Todos los lugares con su distancia (ordenados tras buscar)
+    private val _todos = MutableStateFlow(
         lugaresRepo.obtenerLugares().map { LugarConDistancia(it, null) }
     )
-    val lugares: StateFlow<List<LugarConDistancia>> = _lugares.asStateFlow()
+
+    // Mejora 1: filtro por categoría (null = todas)
+    val categorias: List<String> = lugaresRepo.obtenerLugares().map { it.categoria }.distinct()
+    private val _categoria = MutableStateFlow<String?>(null)
+    val categoria: StateFlow<String?> = _categoria.asStateFlow()
+
+    // Lo que ve la pantalla: la lista ya filtrada. El mapa y la lista usan la misma
+    val lugares: StateFlow<List<LugarConDistancia>> = combine(_todos, _categoria) { todos, cat ->
+        if (cat == null) todos else todos.filter { it.lugar.categoria == cat }
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, _todos.value)
 
     private val _seleccionado = MutableStateFlow<Int?>(null)
     val seleccionado: StateFlow<Int?> = _seleccionado.asStateFlow()
@@ -68,13 +79,25 @@ class MapaViewModel(
         val ordenados = lugaresRepo.obtenerLugares()
             .map { LugarConDistancia(it, distanciaMetros(pos, it)) }
             .sortedBy { it.metros }
-        _lugares.value = ordenados
+        _todos.value = ordenados
         Log.d(TAG, ordenados.joinToString { "${it.lugar.nombre}=${it.metros?.toInt()} m" })
     }
 
     fun seleccionar(id: Int?) {
         _seleccionado.value = id
     }
+
+    fun filtrar(cat: String?) {
+        _categoria.value = cat
+        // Si el seleccionado queda oculto por el filtro, se deselecciona
+        val id = _seleccionado.value
+        if (cat != null && id != null &&
+            _todos.value.none { it.lugar.id == id && it.lugar.categoria == cat }
+        ) {
+            _seleccionado.value = null
+        }
+    }
+
     // Se deriva de lugares: el primero con distancia calculada (null si aún no hay ubicación)
     val masCercano: StateFlow<Lugar?> = lugares
         .map { lista -> lista.firstOrNull { it.metros != null }?.lugar }
