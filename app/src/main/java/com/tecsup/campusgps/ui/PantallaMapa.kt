@@ -21,11 +21,15 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tecsup.campusgps.model.UbicacionUi
 import com.tecsup.campusgps.util.formatearDistancia
@@ -43,20 +47,31 @@ fun PantallaMapa(vm: MapaViewModel) {
     val dentroDelRadio by vm.dentroDelRadio.collectAsStateWithLifecycle()
 
     val contexto = LocalContext.current
-    val lanzador = rememberLauncherForActivityResult(
-        ActivityResultContracts.RequestMultiplePermissions()
-    ) { resultado ->
-        // Basta con FINE o COARSE para obtener una ubicación
-        if (resultado.values.any { it }) vm.buscar() else vm.permisoDenegado()
-    }
 
     fun tienePermiso(permiso: String) =
         ContextCompat.checkSelfPermission(contexto, permiso) == PackageManager.PERMISSION_GRANTED
 
+    fun permisoConcedido() = tienePermiso(Manifest.permission.ACCESS_FINE_LOCATION) ||
+        tienePermiso(Manifest.permission.ACCESS_COARSE_LOCATION)
+
+    // Mejora 3: el punto azul nativo solo se activa si hay permiso.
+    // Se vuelve a comprobar al regresar a la app (por ejemplo, desde Ajustes)
+    var conPermiso by remember { mutableStateOf(permisoConcedido()) }
+    LifecycleResumeEffect(Unit) {
+        conPermiso = permisoConcedido()
+        onPauseOrDispose { }
+    }
+
+    val lanzador = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { resultado ->
+        // Basta con FINE o COARSE para obtener una ubicación
+        conPermiso = resultado.values.any { it }
+        if (conPermiso) vm.buscar() else vm.permisoDenegado()
+    }
+
     fun alPulsar() {
-        if (tienePermiso(Manifest.permission.ACCESS_FINE_LOCATION) ||
-            tienePermiso(Manifest.permission.ACCESS_COARSE_LOCATION)
-        ) {
+        if (permisoConcedido()) {
             vm.buscar()
         } else {
             lanzador.launch(
@@ -86,6 +101,7 @@ fun PantallaMapa(vm: MapaViewModel) {
                 seleccionado = seleccionado,
                 masCercanoId = masCercano?.id,
                 radio = radio,
+                puntoAzul = conPermiso,
                 modifier = Modifier.fillMaxWidth().weight(1f)
             )
             Column(

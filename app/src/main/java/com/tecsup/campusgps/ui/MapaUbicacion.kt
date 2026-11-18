@@ -11,6 +11,8 @@ import com.google.android.gms.maps.model.LatLng
 import androidx.compose.ui.graphics.Color
 import com.google.maps.android.compose.Circle
 import com.google.maps.android.compose.GoogleMap
+import com.google.maps.android.compose.MapProperties
+import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.maps.android.compose.rememberUpdatedMarkerState
@@ -24,6 +26,7 @@ fun MapaUbicacion(
     seleccionado: Int?,
     masCercanoId: Int?,
     radio: Int? = null,
+    puntoAzul: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     val camara = rememberCameraPositionState {
@@ -44,7 +47,13 @@ fun MapaUbicacion(
         camara.animate(CameraUpdateFactory.newLatLngZoom(LatLng(lugar.latitud, lugar.longitud), 17f))
     }
 
-    GoogleMap(modifier = modifier, cameraPositionState = camara) {
+    // Punto azul nativo y botón "mi ubicación" del mapa, solo con permiso concedido
+    GoogleMap(
+        modifier = modifier,
+        cameraPositionState = camara,
+        properties = MapProperties(isMyLocationEnabled = puntoAzul),
+        uiSettings = MapUiSettings(myLocationButtonEnabled = puntoAzul)
+    ) {
         if (estado is UbicacionUi.Lista) {
             Marker(
                 state = rememberUpdatedMarkerState(
