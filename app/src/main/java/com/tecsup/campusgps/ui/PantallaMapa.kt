@@ -1,5 +1,9 @@
 package com.tecsup.campusgps.ui
 
+import android.Manifest
+import android.content.pm.PackageManager
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -16,6 +20,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.core.content.ContextCompat
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tecsup.campusgps.model.UbicacionUi
@@ -26,9 +32,30 @@ import com.tecsup.campusgps.viewmodel.MapaViewModel
 fun PantallaMapa(vm: MapaViewModel) {
     val estado by vm.estado.collectAsStateWithLifecycle()
 
-    // TODO Paso 2: pedir el permiso antes de buscar
+    val contexto = LocalContext.current
+    val lanzador = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { resultado ->
+        // Basta con FINE o COARSE para obtener una ubicación
+        if (resultado.values.any { it }) vm.buscar() else vm.permisoDenegado()
+    }
+
+    fun tienePermiso(permiso: String) =
+        ContextCompat.checkSelfPermission(contexto, permiso) == PackageManager.PERMISSION_GRANTED
+
     fun alPulsar() {
-        vm.buscar()
+        if (tienePermiso(Manifest.permission.ACCESS_FINE_LOCATION) ||
+            tienePermiso(Manifest.permission.ACCESS_COARSE_LOCATION)
+        ) {
+            vm.buscar()
+        } else {
+            lanzador.launch(
+                arrayOf(
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                )
+            )
+        }
     }
 
     Scaffold(
