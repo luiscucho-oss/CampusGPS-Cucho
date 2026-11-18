@@ -98,7 +98,7 @@ fun PantallaMapa(vm: MapaViewModel) {
                     is UbicacionUi.Lista -> Text(
                         "Lat: %.5f  ·  Lon: %.5f".format(e.posicion.latitud, e.posicion.longitud)
                     )
-                    is UbicacionUi.Error -> Text(e.mensaje, color = MaterialTheme.colorScheme.error)
+                    is UbicacionUi.Error -> MensajeError(error = e, onReintentar = { alPulsar() })
                 }
                 OutlinedButton(
                     onClick = { masCercano?.let { vm.seleccionar(it.id) } },
