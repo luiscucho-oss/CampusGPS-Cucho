@@ -7,6 +7,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
@@ -31,6 +32,8 @@ import com.tecsup.campusgps.viewmodel.MapaViewModel
 @Composable
 fun PantallaMapa(vm: MapaViewModel) {
     val estado by vm.estado.collectAsStateWithLifecycle()
+    val lugares by vm.lugares.collectAsStateWithLifecycle()
+    val seleccionado by vm.seleccionado.collectAsStateWithLifecycle()
 
     val contexto = LocalContext.current
     val lanzador = rememberLauncherForActivityResult(
@@ -69,22 +72,29 @@ fun PantallaMapa(vm: MapaViewModel) {
             )
         }
     ) { padding ->
-        Column(
-            modifier = Modifier.fillMaxSize().padding(padding).padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            Button(onClick = { alPulsar() }, enabled = estado !is UbicacionUi.Buscando) {
-                Text("Obtener mi ubicación")
-            }
-            when (val e = estado) {
-                UbicacionUi.Inicial -> Text("Pulsa el botón para conocer tu ubicación")
-                UbicacionUi.Buscando -> CircularProgressIndicator()
-                is UbicacionUi.Lista -> {
-                    Text("Latitud: ${e.posicion.latitud}")
-                    Text("Longitud: ${e.posicion.longitud}")
+        Column(modifier = Modifier.fillMaxSize().padding(padding)) {
+            MapaUbicacion(
+                estado = estado,
+                lugares = lugares,
+                seleccionado = seleccionado,
+                modifier = Modifier.fillMaxWidth().weight(1f)
+            )
+            Column(
+                modifier = Modifier.fillMaxWidth().padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Button(onClick = { alPulsar() }, enabled = estado !is UbicacionUi.Buscando) {
+                    Text("Obtener mi ubicación")
                 }
-                is UbicacionUi.Error -> Text(e.mensaje, color = MaterialTheme.colorScheme.error)
+                when (val e = estado) {
+                    UbicacionUi.Inicial -> Text("Pulsa el botón para conocer tu ubicación")
+                    UbicacionUi.Buscando -> CircularProgressIndicator()
+                    is UbicacionUi.Lista -> Text(
+                        "Lat: %.5f  ·  Lon: %.5f".format(e.posicion.latitud, e.posicion.longitud)
+                    )
+                    is UbicacionUi.Error -> Text(e.mensaje, color = MaterialTheme.colorScheme.error)
+                }
             }
         }
     }
