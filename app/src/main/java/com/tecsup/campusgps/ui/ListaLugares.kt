@@ -38,6 +38,7 @@ fun ListaLugares(
     seleccionado: Int?,
     onClick: (Int) -> Unit,
     masCercanoId: Int? = null,
+    dentroDelRadio: Set<Int> = emptySet(),
     modifier: Modifier = Modifier
 ) {
     LazyColumn(
@@ -50,6 +51,7 @@ fun ListaLugares(
                 item = item,
                 marcado = item.lugar.id == seleccionado,
                 cercano = item.lugar.id == masCercanoId,
+                enRadio = item.lugar.id in dentroDelRadio,
                 onClick = { onClick(item.lugar.id) }
             )
         }
@@ -61,6 +63,7 @@ private fun TarjetaLugar(
     item: LugarConDistancia,
     marcado: Boolean,
     cercano: Boolean,
+    enRadio: Boolean,
     onClick: () -> Unit
 ) {
     Card(
@@ -85,6 +88,14 @@ private fun TarjetaLugar(
                     style = MaterialTheme.typography.bodySmall,
                     color = Color.Gray
                 )
+                if (enRadio) {
+                    Text(
+                        "Dentro del radio",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.primary,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
             }
             Text(
                 item.metros?.let { formatearDistancia(it) } ?: "Sin calcular",

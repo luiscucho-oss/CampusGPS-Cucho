@@ -39,6 +39,8 @@ fun PantallaMapa(vm: MapaViewModel) {
     val seleccionado by vm.seleccionado.collectAsStateWithLifecycle()
     val masCercano by vm.masCercano.collectAsStateWithLifecycle()
     val categoria by vm.categoria.collectAsStateWithLifecycle()
+    val radio by vm.radio.collectAsStateWithLifecycle()
+    val dentroDelRadio by vm.dentroDelRadio.collectAsStateWithLifecycle()
 
     val contexto = LocalContext.current
     val lanzador = rememberLauncherForActivityResult(
@@ -83,6 +85,7 @@ fun PantallaMapa(vm: MapaViewModel) {
                 lugares = lugares,
                 seleccionado = seleccionado,
                 masCercanoId = masCercano?.id,
+                radio = radio,
                 modifier = Modifier.fillMaxWidth().weight(1f)
             )
             Column(
@@ -115,6 +118,12 @@ fun PantallaMapa(vm: MapaViewModel) {
                     )
                 }
             }
+            SelectorRadio(
+                opciones = vm.opcionesRadio,
+                seleccionado = radio,
+                habilitado = estado is UbicacionUi.Lista,
+                onSeleccionar = { vm.cambiarRadio(it) }
+            )
             FiltroCategorias(
                 categorias = vm.categorias,
                 seleccionada = categoria,
@@ -125,6 +134,7 @@ fun PantallaMapa(vm: MapaViewModel) {
                 seleccionado = seleccionado,
                 onClick = { vm.seleccionar(it) },
                 masCercanoId = masCercano?.id,
+                dentroDelRadio = dentroDelRadio,
                 modifier = Modifier.fillMaxWidth().height(200.dp)
             )
         }
