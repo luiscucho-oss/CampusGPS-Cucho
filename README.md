@@ -78,18 +78,18 @@ util/  ---> distanciaMetros(), formatearDistancia()  (funciones puras)
 
 | Prueba | Resultado esperado | OK |
 |---|---|---|
-| Abrir la app por primera vez y pulsar el botón | Aparece el cuadro de permiso | ☐ |
-| Aceptar el permiso | Se ven latitud, longitud y el marcador *Estás aquí* | ☐ |
-| Negar el permiso | Mensaje de error con *Abrir ajustes*; la app no se cierra | ☐ |
-| Ubicación en el punto base | Los 5 marcadores azules aparecen cerca de tu posición | ☐ |
-| Tocar un marcador | Se ven el nombre y la categoría del lugar | ☐ |
-| Lista de lugares | Ordenada de menor a mayor distancia, con m o km | ☐ |
-| Tocar una tarjeta de la lista | La cámara viaja a ese lugar y la tarjeta queda resaltada | ☐ |
-| Ir al más cercano | La cámara va al lugar verde; el botón está deshabilitado antes de buscar | ☐ |
-| Cambiar la ubicación del emulador y buscar otra vez | Se actualizan las distancias, el orden y el lugar verde | ☐ |
-| Ubicación apagada | Mensaje de GPS con *Reintentar* | ☐ |
-| Rotar la pantalla | No se pierden la ubicación ni la lista (el estado vive en el ViewModel) | ☐ |
-| Revisar el repositorio | `git grep "AIza"` no encuentra nada y `local.properties` no está subido | ☐ |
+| Abrir la app por primera vez y pulsar el botón | Aparece el cuadro de permiso | ✅ |
+| Aceptar el permiso | Se ven latitud, longitud y el marcador *Estás aquí* | ✅ |
+| Negar el permiso | Mensaje de error con *Abrir ajustes*; la app no se cierra | ✅ |
+| Ubicación en el punto base | Los 5 marcadores azules aparecen cerca de tu posición | ✅ |
+| Tocar un marcador | Se ven el nombre y la categoría del lugar | ✅ |
+| Lista de lugares | Ordenada de menor a mayor distancia, con m o km | ✅ |
+| Tocar una tarjeta de la lista | La cámara viaja a ese lugar y la tarjeta queda resaltada | ✅ |
+| Ir al más cercano | La cámara va al lugar verde; el botón está deshabilitado antes de buscar | ✅ |
+| Cambiar la ubicación del emulador y buscar otra vez | Se actualizan las distancias, el orden y el lugar verde | ✅ |
+| Ubicación apagada | Mensaje de GPS con *Reintentar* | ✅ |
+| Rotar la pantalla | No se pierden la ubicación ni la lista (el estado vive en el ViewModel) | ✅ |
+| Revisar el repositorio | `git grep "AIza"` no encuentra nada y `local.properties` no está subido | ✅ |
 
 ## Para pensar
 
