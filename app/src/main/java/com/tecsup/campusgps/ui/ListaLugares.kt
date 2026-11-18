@@ -29,6 +29,7 @@ import com.tecsup.campusgps.model.LugarConDistancia
 import com.tecsup.campusgps.util.formatearDistancia
 
 val ColorLugar = Color(0xFF2196F3)
+val ColorCercano = Color(0xFF43A047)
 
 // No conoce el ViewModel: recibe la lista, el seleccionado y un callback
 @Composable
@@ -36,6 +37,7 @@ fun ListaLugares(
     lugares: List<LugarConDistancia>,
     seleccionado: Int?,
     onClick: (Int) -> Unit,
+    masCercanoId: Int? = null,
     modifier: Modifier = Modifier
 ) {
     LazyColumn(
@@ -47,6 +49,7 @@ fun ListaLugares(
             TarjetaLugar(
                 item = item,
                 marcado = item.lugar.id == seleccionado,
+                cercano = item.lugar.id == masCercanoId,
                 onClick = { onClick(item.lugar.id) }
             )
         }
@@ -54,7 +57,12 @@ fun ListaLugares(
 }
 
 @Composable
-private fun TarjetaLugar(item: LugarConDistancia, marcado: Boolean, onClick: () -> Unit) {
+private fun TarjetaLugar(
+    item: LugarConDistancia,
+    marcado: Boolean,
+    cercano: Boolean,
+    onClick: () -> Unit
+) {
     Card(
         onClick = onClick,
         modifier = Modifier.fillMaxWidth(),
@@ -68,7 +76,7 @@ private fun TarjetaLugar(item: LugarConDistancia, marcado: Boolean, onClick: () 
             modifier = Modifier.padding(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Box(Modifier.size(12.dp).background(ColorLugar, CircleShape))
+            Box(Modifier.size(12.dp).background(if (cercano) ColorCercano else ColorLugar, CircleShape))
             Spacer(Modifier.width(12.dp))
             Column(Modifier.weight(1f)) {
                 Text(item.lugar.nombre, fontWeight = FontWeight.Bold)
